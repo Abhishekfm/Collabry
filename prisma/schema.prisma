@@ -62,7 +62,16 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    bio           String?
     posts         Post[]
+    password      String
+    role          UserRole  @default(MEMBER)
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+    tasks         Task[]
+    assignedTasks Task[]    @relation("TaskAssignee")
+    projects      ProjectMember[]
+    createdProjects Project[] @relation("ProjectCreator")
 }
 
 model VerificationToken {
@@ -71,4 +80,100 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  creatorId   String
+
+  creator     User @relation("ProjectCreator", fields: [creatorId], references: [id])
+  members     ProjectMember[]
+  tasks       Task[]
+}
+
+model ProjectMember {
+  id        String @id @default(cuid())
+  projectId String
+  userId    String
+  role      ProjectRole @default(MEMBER)
+  joinedAt  DateTime @default(now())
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  projectId   String
+  creatorId   String
+  assigneeId  String?
+
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator     User @relation(fields: [creatorId], references: [id])
+  assignee    User? @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  tags        TaskTag[]
+}
+
+model Tag {
+  id        String @id @default(cuid())
+  name      String @unique
+  color     String @default("#3B82F6")
+  createdAt DateTime @default(now())
+
+  tasks     TaskTag[]
+}
+
+model TaskTag {
+  taskId String
+  tagId  String
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag    Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ProjectRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
