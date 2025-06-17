@@ -173,7 +173,7 @@ export function CreateTaskModal({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {taskInfo ? "Update Task" : "Create New Task"}
+            {taskInfo ? "Edit Task" : "Create New Task"}
           </DialogTitle>
         </DialogHeader>
 

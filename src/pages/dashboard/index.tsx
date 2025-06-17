@@ -10,6 +10,7 @@ import { Input } from "~/components/ui/input";
 import { ProjectCard } from "~/components/project-card";
 import { CreateProjectModal } from "~/components/create-project-modal";
 import { api } from "~/utils/api";
+import LoadingSpinner from "~/components/loading-spinner";
 
 // export const metadata: Metadata = {
 //   title: "Dashboard | Collabry",
@@ -61,7 +62,11 @@ export default function Dashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [projectUpdated, setProjectUpdated] = useState(false);
 
-  const { data: allProjects, refetch } = api.project.getAll.useQuery();
+  const {
+    data: allProjects,
+    refetch,
+    isLoading,
+  } = api.project.getAll.useQuery();
 
   console.log("getAllProjects", allProjects);
 
@@ -85,7 +90,7 @@ export default function Dashboard() {
   }, [status, router]);
 
   if (status === "loading" || status === "unauthenticated") {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (
@@ -106,7 +111,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  Your Projects
+                  Collaborative Projects
                 </h1>
                 <p className="mt-1 text-gray-600">
                   Manage and track all your collaborative work
@@ -159,25 +164,29 @@ export default function Dashboard() {
 
           {/* Projects Grid */}
           {!allProjects || allProjects?.length === 0 ? (
-            <div className="py-12 text-center">
-              <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gray-100">
-                <Plus className="h-8 w-8 text-gray-400" />
+            isLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <div className="py-12 text-center">
+                <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gray-100">
+                  <Plus className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="mb-2 text-lg font-medium text-gray-900">
+                  No projects found
+                </h3>
+                <p className="mb-4 text-gray-600">
+                  {searchQuery
+                    ? "Try adjusting your search terms"
+                    : "Get started by creating your first project"}
+                </p>
+                {!searchQuery && (
+                  <Button onClick={() => setShowCreateModal(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Project
+                  </Button>
+                )}
               </div>
-              <h3 className="mb-2 text-lg font-medium text-gray-900">
-                No projects found
-              </h3>
-              <p className="mb-4 text-gray-600">
-                {searchQuery
-                  ? "Try adjusting your search terms"
-                  : "Get started by creating your first project"}
-              </p>
-              {!searchQuery && (
-                <Button onClick={() => setShowCreateModal(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Project
-                </Button>
-              )}
-            </div>
+            )
           ) : (
             <div
               className={

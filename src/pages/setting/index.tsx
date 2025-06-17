@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,6 +13,7 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
+
 import {
   Form,
   FormControl,
@@ -25,6 +26,13 @@ import {
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Header } from "~/components/header";
 import Link from "next/link";
+import { format } from "date-fns";
+import { enUS } from "date-fns/locale";
+import { api } from "~/utils/api";
+import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import LoadingSpinner from "~/components/loading-spinner";
 
 const profileSchema = z
   .object({
@@ -34,6 +42,7 @@ const profileSchema = z
       .max(50, "Name must be less than 50 characters"),
     email: z.string().email("Please enter a valid email address"),
     bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
+    image: z.string().url("Please enter a valid image URL").optional(),
     currentPassword: z.string().optional(),
     newPassword: z
       .string()
@@ -71,63 +80,136 @@ const profileSchema = z
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-// Mock current user data
-const mockCurrentUser = {
-  id: "user_current",
-  name: "John Doe",
-  email: "john.doe@example.com",
-  image: "/placeholder.svg?height=120&width=120",
-  bio: "Full-stack developer passionate about creating efficient and scalable web applications. Love working with modern technologies and solving complex problems.",
-  role: "ADMIN" as const,
-  createdAt: new Date("2023-03-10"),
-  updatedAt: new Date("2024-01-15"),
-};
-
 export default function ProfileSettingsPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [profileImage, setProfileImage] = useState(mockCurrentUser.image);
+  const [profileImage, setProfileImage] = useState("");
+
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // tRPC queries and mutations
+  const {
+    data: userProfile,
+    isLoading: isLoadingProfile,
+    error: profileError,
+  } = api.userRouter.getProfile.useQuery();
+
+  const updateProfileMutation = api.userRouter.updateProfile.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      // Reset password fields after successful update
+      form.setValue("currentPassword", "");
+      form.setValue("newPassword", "");
+      form.setValue("confirmPassword", "");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const changePasswordMutation = api.userRouter.changePassword.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      // Reset password fields after successful change
+      form.setValue("currentPassword", "");
+      form.setValue("newPassword", "");
+      form.setValue("confirmPassword", "");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: mockCurrentUser.name,
-      email: mockCurrentUser.email,
-      bio: mockCurrentUser.bio || "",
+      name: "",
+      email: "",
+      bio: "",
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
   });
 
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      void router.push("/auth/signin");
+    }
+  }, [status, router]);
+
+  // Update form when user data is loaded
+  useEffect(() => {
+    if (userProfile) {
+      form.setValue("name", userProfile.name ?? "");
+      form.setValue("email", userProfile.email ?? "");
+      form.setValue("bio", userProfile.bio ?? "");
+      if (userProfile.image) form.setValue("image", userProfile.image);
+      setProfileImage(userProfile.image ?? "");
+    }
+  }, [userProfile, form]);
+
   const onSubmit = async (data: ProfileFormData) => {
-    setIsLoading(true);
     try {
-      // In real app: await api.user.updateProfile.mutate(data)
-      console.log("Updating profile:", data);
+      // Check if password fields are filled
+      const isPasswordChange =
+        data.currentPassword && data.newPassword && data.confirmPassword;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (isPasswordChange) {
+        // Handle password change separately
+        await changePasswordMutation.mutateAsync({
+          currentPassword: data.currentPassword!,
+          newPassword: data.newPassword!,
+          confirmNewPassword: data.confirmPassword!,
+        });
+      }
 
-      // Show success message
-      alert("Profile updated successfully!");
+      // Update profile information (excluding password fields)
+      const profileData = {
+        name: data.name,
+        email: data.email,
+        bio: data.bio ?? undefined,
+        image: data.image ?? undefined,
+      };
+
+      // Only update if there are actual changes
+      const hasProfileChanges =
+        profileData.name !== userProfile?.name ||
+        profileData.email !== userProfile?.email ||
+        profileData.bio !== userProfile?.bio ||
+        profileData.image !== userProfile?.image;
+
+      if (hasProfileChanges) {
+        await updateProfileMutation.mutateAsync(profileData);
+      }
+
+      if (!isPasswordChange && !hasProfileChanges) {
+        toast.error("No changes to save");
+      }
     } catch (error) {
+      // Error handling is done in mutation callbacks
       console.error("Failed to update profile:", error);
-      alert("Failed to update profile. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // In a real app, you'd upload this to a cloud service (AWS S3, Cloudinary, etc.)
+      // For now, we'll create a local preview
       const reader = new FileReader();
       reader.onload = (e) => {
-        setProfileImage(e.target?.result as string);
+        const imageUrl = e.target?.result as string;
+        setProfileImage(imageUrl);
+        form.setValue("image", imageUrl);
       };
       reader.readAsDataURL(file);
+
+      // Show info about uploading to cloud storage
+      toast.error(
+        "In production, upload this image to cloud storage and use the URL",
+      );
     }
   };
 
@@ -138,17 +220,69 @@ export default function ProfileSettingsPage() {
       )
     ) {
       try {
-        // In real app: await api.user.deleteAccount.mutate()
-        console.log("Deleting account...");
-        alert(
+        // You would implement this API endpoint
+        // await api.user.deleteAccount.mutate();
+        toast.success(
           "Account deletion initiated. You will receive a confirmation email.",
         );
       } catch (error) {
-        console.error("Failed to delete account:", error);
-        alert("Failed to delete account. Please try again.");
+        toast.error("Failed to delete account. Please try again.");
       }
     }
   };
+
+  if (status === "loading" || status === "unauthenticated") {
+    return <LoadingSpinner />;
+  }
+
+  // Loading state
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="container mx-auto max-w-4xl px-4 py-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+              <p className="text-gray-600">Loading profile...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Error state
+  if (profileError) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="container mx-auto max-w-4xl px-4 py-6">
+          <Alert className="border-red-200 bg-red-50">
+            <AlertDescription className="text-red-700">
+              Failed to load profile: {profileError.message}
+            </AlertDescription>
+          </Alert>
+        </main>
+      </div>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="container mx-auto max-w-4xl px-4 py-6">
+          <Alert>
+            <AlertDescription>No profile data available.</AlertDescription>
+          </Alert>
+        </main>
+      </div>
+    );
+  }
+
+  const isLoading =
+    updateProfileMutation.isPending || changePasswordMutation.isPending;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -187,24 +321,28 @@ export default function ProfileSettingsPage() {
                 <div className="flex items-center gap-6">
                   <Avatar className="h-24 w-24">
                     <AvatarImage
-                      src={profileImage || "/placeholder.svg"}
-                      alt={mockCurrentUser.name}
+                      src={
+                        profileImage ?? userProfile.image ?? "/placeholder.svg"
+                      }
+                      alt={userProfile.name ?? "User"}
                     />
                     <AvatarFallback className="text-xl">
-                      {mockCurrentUser.name
-                        .split(" ")
+                      {userProfile.name
+                        ?.split(" ")
                         .map((n) => n[0])
-                        .join("")}
+                        .join("") ?? "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="mb-2 flex items-center gap-3">
                       <Badge className="bg-red-100 text-red-800">
-                        {mockCurrentUser.role}
+                        {userProfile.role}
                       </Badge>
                       <span className="text-sm text-gray-500">
                         Member since{" "}
-                        {mockCurrentUser.createdAt.toLocaleDateString()}
+                        {format(new Date(userProfile.createdAt), "P", {
+                          locale: enUS,
+                        })}
                       </span>
                     </div>
                     <div className="flex gap-2">
@@ -287,6 +425,30 @@ export default function ProfileSettingsPage() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Profile Image URL</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://example.com/your-image.jpg"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            setProfileImage(e.target.value);
+                          }}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        You can upload an image above or paste a URL here
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </CardContent>
             </Card>
 
@@ -298,8 +460,8 @@ export default function ProfileSettingsPage() {
               <CardContent className="space-y-6">
                 <Alert>
                   <AlertDescription>
-                    Leave password fields empty if you don't want to change your
-                    password.
+                    Leave password fields empty if you don&apos;t want to change
+                    your password.
                   </AlertDescription>
                 </Alert>
 
@@ -394,7 +556,7 @@ export default function ProfileSettingsPage() {
             </Card>
 
             {/* Actions */}
-            <div className="flex justify-between">
+            <div className="flex justify-end">
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -404,7 +566,7 @@ export default function ProfileSettingsPage() {
                 {isLoading ? "Saving..." : "Save Changes"}
               </Button>
 
-              <Button
+              {/* <Button
                 type="button"
                 variant="destructive"
                 onClick={handleDeleteAccount}
@@ -412,7 +574,7 @@ export default function ProfileSettingsPage() {
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Account
-              </Button>
+              </Button> */}
             </div>
           </form>
         </Form>

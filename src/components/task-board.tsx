@@ -15,6 +15,7 @@ import { type Priority, TaskStatus } from "@prisma/client"; // Adjust import pat
 import toast from "react-hot-toast";
 import { type AppRouter } from "~/server/api/root";
 import { type inferRouterOutputs } from "@trpc/server";
+import LoadingSpinner from "./loading-spinner";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 type ProjectFromApi = RouterOutput["project"]["getById"];
@@ -187,11 +188,7 @@ export function TaskBoard({
   };
 
   if (projectLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="text-lg text-gray-500">Loading tasks...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!project) {

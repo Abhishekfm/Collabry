@@ -91,7 +91,10 @@ export default function ProjectPage() {
                   {project?.description}
                 </p>
                 <div className="flex items-center gap-4">
-                  <Badge variant="outline" className="flex items-center gap-1">
+                  <Badge
+                    variant="outline"
+                    className="flex items-center gap-1 bg-gray-200 font-[300]"
+                  >
                     <Users className="h-3 w-3" />
                     {project?.members.length} members
                   </Badge>
@@ -103,7 +106,7 @@ export default function ProjectPage() {
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => setShowMembers(true)}>
                 <Users className="mr-2 h-4 w-4" />
-                Members
+                {project?.members.length} Members
               </Button>
               {project?.isCreator && (
                 <Button variant="outline">

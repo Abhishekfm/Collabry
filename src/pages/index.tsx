@@ -6,6 +6,10 @@ import { ArrowRight, Check, Star, Play } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import Link from "next/link";
+import { Header } from "~/components/header";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import HeaderTray from "~/components/header-tray";
 
 const teamAvatars = [
   {
@@ -62,6 +66,9 @@ const testimonials = [
 export default function Home() {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
 
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Subtle background pattern */}
@@ -86,24 +93,28 @@ export default function Home() {
           </motion.div>
 
           {/* Navigation Links */}
-          <motion.div
-            className="flex items-center gap-8"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Link
-              href="/dashboard"
-              className="text-slate-600 transition-colors hover:text-slate-900"
+          {session?.user.email ? (
+            <HeaderTray />
+          ) : (
+            <motion.div
+              className="flex items-center gap-8"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              Login
-            </Link>
-            <Link href="/dashboard">
-              <Button className="bg-slate-900 px-6 text-white hover:bg-slate-800">
-                Register
-              </Button>
-            </Link>
-          </motion.div>
+              <Link
+                href="/auth/signin"
+                className="text-slate-600 transition-colors hover:text-slate-900"
+              >
+                Login
+              </Link>
+              <Link href="/auth/signup">
+                <Button className="bg-slate-900 px-6 text-white hover:bg-slate-800">
+                  Register
+                </Button>
+              </Link>
+            </motion.div>
+          )}
         </div>
       </nav>
 
@@ -148,7 +159,7 @@ export default function Home() {
           >
             The project management
             <br />
-            <span className="text-slate-600">you're looking for</span>
+            <span className="text-slate-600">you&apos;re looking for</span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -372,7 +383,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="mb-6 leading-relaxed text-slate-700">
-                  "{testimonial.content}"
+                  {testimonial.content}
                 </p>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
