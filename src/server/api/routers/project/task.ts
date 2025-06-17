@@ -33,14 +33,11 @@ export const taskRouter = createTRPCRouter({
           include: {
             assignee: true,
             creator: true,
-            tags: {
-              include: {
-                tag: true,
-              },
-            },
           },
           orderBy: { createdAt: "desc" },
         });
+
+        return tasks;
       } catch (error) {
         return new TRPCError({
           message: "Something went wrong!",
@@ -54,10 +51,10 @@ export const taskRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         description: z.string().optional(),
-        projectId: z.string(),
-        assigneeId: z.string().optional(),
+        projectId: z.string().min(1),
+        assigneeId: z.string().min(1),
         priority: z.nativeEnum(Priority).default(Priority.MEDIUM),
-        dueDate: z.date().optional(),
+        dueDate: z.date().min(new Date()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -165,6 +162,75 @@ export const taskRouter = createTRPCRouter({
       });
     }),
 
+  // Add this to your task router
+  updateStatus: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().cuid("Invalid task ID"),
+        status: z.nativeEnum(TaskStatus),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      // First, check if the user has access to this task
+      const task = await ctx.db.task.findFirst({
+        where: {
+          id: input.id,
+          project: {
+            OR: [
+              {
+                members: {
+                  some: {
+                    userId: userId,
+                  },
+                },
+              },
+              { creatorId: userId },
+            ],
+          },
+        },
+        include: {
+          project: true,
+        },
+      });
+
+      if (!task) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Task not found or you don't have access to it",
+        });
+      }
+
+      // Update the task status
+      const updatedTask = await ctx.db.task.update({
+        where: { id: input.id },
+        data: {
+          status: input.status,
+          updatedAt: new Date(),
+        },
+        include: {
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+          creator: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+        },
+      });
+
+      return updatedTask;
+    }),
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -175,21 +241,27 @@ export const taskRouter = createTRPCRouter({
         });
 
         if (!task) {
-          return new TRPCError({
-            code: "BAD_REQUEST",
+          throw new TRPCError({
+            code: "NOT_FOUND",
             message: "Task not found!",
           });
         }
 
         if (task.creatorId !== ctx.session.user.id) {
-          return new TRPCError({
+          throw new TRPCError({
             code: "BAD_REQUEST",
             message: "You are not allowed to delete this task!",
           });
         }
+        const result = await ctx.db.task.delete({
+          where: {
+            id: input.id,
+          },
+        });
+        return result;
       } catch (error) {
-        return new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+        throw new TRPCError({
+          code: "BAD_REQUEST",
           message: "Something went wrong!",
           cause: error,
         });
