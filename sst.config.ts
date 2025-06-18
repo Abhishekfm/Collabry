@@ -1,36 +1,16 @@
-import { SSTConfig } from "sst";
-import { StaticSite } from "sst/constructs";
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="./.sst/platform/config.d.ts" />
 
-export default {
-  config(_input) {
+export default $config({
+  app(input) {
     return {
-      name: "sst-dev",
-      region: "us-east-1",
+      name: "collabry",
+      removal: input?.stage === "production" ? "retain" : "remove",
+      protect: ["production"].includes(input?.stage),
+      home: "aws",
     };
   },
-  stacks(app) {
-    app.stack(function Site({ stack }) {
-      const site = new StaticSite(stack, "site", {
-        customDomain:
-          stack.stage === "prod"
-            ? {
-                hostedZone: "sst.dev",
-                domainName: "guide.sst.dev",
-              }
-            : stack.stage.startsWith("branchv")
-              ? {
-                  hostedZone: "archives.sst.dev",
-                  domainName: `${stack.stage}.archives.sst.dev`,
-                }
-              : undefined,
-        errorPage: "404.html",
-        buildOutput: "_site",
-        buildCommand: "bundle install && bundle exec jekyll build",
-      });
-
-      stack.addOutputs({
-        Url: site.customDomainUrl || site.url,
-      });
-    });
+  async run() {
+    new sst.aws.Nextjs("MyWeb");
   },
-} satisfies SSTConfig;
+});
