@@ -321,9 +321,7 @@ export default function ProfileSettingsPage() {
                 <div className="flex items-center gap-6">
                   <Avatar className="h-24 w-24">
                     <AvatarImage
-                      src={
-                        profileImage ?? userProfile.image ?? "/placeholder.svg"
-                      }
+                      src={profileImage ?? "/placeholder.svg"}
                       alt={userProfile.name ?? "User"}
                     />
                     <AvatarFallback className="text-xl">

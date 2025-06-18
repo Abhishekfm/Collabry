@@ -93,7 +93,7 @@ export default function Home() {
           </motion.div>
 
           {/* Navigation Links */}
-          {session?.user.email ? (
+          {status !== "loading" && session?.user.email ? (
             <HeaderTray />
           ) : (
             <motion.div

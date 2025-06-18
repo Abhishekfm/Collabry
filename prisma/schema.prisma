@@ -64,7 +64,7 @@ model User {
     sessions      Session[]
     bio           String?
     posts         Post[]
-    password      String
+    password      String?
     role          UserRole  @default(MEMBER)
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt

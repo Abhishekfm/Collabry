@@ -6,7 +6,9 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import DiscordProvider from "next-auth/providers/discord";
+// import DiscordProvider from "next-auth/providers/discord";
+import GoogleProvider from "next-auth/providers/google";
+
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "~/env";
@@ -57,6 +59,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.email = token.email!;
         session.user.name = token.name!;
+        session.user.image = session.user.image!;
       }
       return session;
     },
@@ -72,6 +75,10 @@ export const authOptions: NextAuthOptions = {
   // },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
+    GoogleProvider({
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -93,15 +100,16 @@ export const authOptions: NextAuthOptions = {
 
         // In a real app, you'd hash passwords during registration
         // For demo purposes, we'll check plain text
-        const isValidPassword = await compare(
-          credentials.password,
-          user.password,
-        );
-        // const isValidPassword = credentials.password === "password123";
-
-        if (!isValidPassword) {
-          return null;
+        if (user.password) {
+          const isValidPassword = await compare(
+            credentials.password,
+            user?.password,
+          );
+          if (!isValidPassword) {
+            return null;
+          }
         }
+        // const isValidPassword = credentials.password === "password123";
 
         return {
           id: user.id,
