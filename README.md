@@ -36,6 +36,7 @@ Collabry is a full-stack, serverless task management and collaboration app built
   - ✔️ Creator of task can only delete the task
   - ✔️ Priority can be set for task.
 - ✅ Assign team members, Priority tags, deadlines
+- ✅ Drag-and-drop task board
 - ✅ User profile and preferences
 - ✅ Project dashboard
 - ✅ Responsive and minimal UI
