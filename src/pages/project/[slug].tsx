@@ -12,6 +12,7 @@ import { Header } from "~/components/header";
 import Link from "next/link";
 import { api } from "~/utils/api";
 import { ProjectRole } from "@prisma/client";
+import Head from "next/head";
 
 // Mock data
 const mockProject = {
@@ -66,124 +67,137 @@ export default function ProjectPage() {
   }, [listUpdated, refetchProject]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <>
+      <Head>
+        <title>Project | {project?.name.slice(0, 20)} | Collabry</title>
+        <meta
+          name="Project"
+          content={`Tasks's description ${project?.description}`}
+        />
+      </Head>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
 
-      <main className="container mx-auto px-4 py-6">
-        {/* Project Header */}
-        <div className="mb-8">
-          <div className="mb-4 flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
+        <main className="container mx-auto px-4 py-6">
+          {/* Project Header */}
+          <div className="mb-8">
+            <div className="mb-4 flex items-center gap-4">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+            </div>
 
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-4">
-              <div className={`h-4 w-4 rounded-full ${project?.color} mt-1`} />
-              <div>
-                <h1 className="mb-2 text-3xl font-bold text-gray-900">
-                  {project?.name}
-                </h1>
-                <p className="mb-4 max-w-2xl text-gray-600">
-                  {project?.description}
-                </p>
-                <div className="flex items-center gap-4">
-                  <Badge
-                    variant="outline"
-                    className="flex items-center gap-1 bg-gray-200 font-[300]"
-                  >
-                    <Users className="h-3 w-3" />
-                    {project?.members.length} members
-                  </Badge>
-                  {project?.isCreator && <Badge>Owner</Badge>}
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div
+                  className={`h-4 w-4 rounded-full ${project?.color} mt-1`}
+                />
+                <div>
+                  <h1 className="mb-2 text-3xl font-bold text-gray-900">
+                    {project?.name}
+                  </h1>
+                  <p className="mb-4 max-w-2xl text-gray-600">
+                    {project?.description}
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <Badge
+                      variant="outline"
+                      className="flex items-center gap-1 bg-gray-200 font-[300]"
+                    >
+                      <Users className="h-3 w-3" />
+                      {project?.members.length} members
+                    </Badge>
+                    {project?.isCreator && <Badge>Owner</Badge>}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => setShowMembers(true)}>
-                <Users className="mr-2 h-4 w-4" />
-                {project?.members.length} Members
-              </Button>
-              {project?.isCreator && (
-                <Button variant="outline">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => setShowMembers(true)}>
+                  <Users className="mr-2 h-4 w-4" />
+                  {project?.members.length} Members
                 </Button>
-              )}
-              <Button
-                onClick={() => setShowCreateTask(true)}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Task
-              </Button>
+                {project?.isCreator && (
+                  <Button variant="outline">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setShowCreateTask(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Task
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Task Board */}
-        <TaskBoard
+          {/* Task Board */}
+          <TaskBoard
+            projectId={params?.slug as string}
+            project={project}
+            refetchProject={refetchProject}
+            projectLoading={projectLoading}
+          />
+        </main>
+
+        <CreateTaskModal
+          open={showCreateTask}
+          onOpenChange={setShowCreateTask}
           projectId={params?.slug as string}
-          project={project}
-          refetchProject={refetchProject}
-          projectLoading={projectLoading}
+          projectMembers={project?.members.map((member) => {
+            return {
+              id: member.user.id,
+              name: member.user.name ?? "",
+              email: member.user.email ?? "",
+              avatar:
+                member.user.image ?? "/placeholder.svg?height=24&width=24",
+            };
+          })}
+          // updateList={() => {
+          //   setListUpdated(true);
+          // }}
         />
-      </main>
 
-      <CreateTaskModal
-        open={showCreateTask}
-        onOpenChange={setShowCreateTask}
-        projectId={params?.slug as string}
-        projectMembers={project?.members.map((member) => {
-          return {
-            id: member.user.id,
-            name: member.user.name ?? "",
-            email: member.user.email ?? "",
-            avatar: member.user.image ?? "/placeholder.svg?height=24&width=24",
-          };
-        })}
-        // updateList={() => {
-        //   setListUpdated(true);
-        // }}
-      />
-
-      <ProjectMembersModal
-        open={showMembers}
-        onOpenChange={setShowMembers}
-        projectId={params?.slug as string}
-        projectMembers={
-          project
-            ? [
-                ...(project.members.map((member) => ({
-                  id: member.user.id,
-                  name: member.user.name ?? "",
-                  email: member.user.email ?? "",
-                  avatar:
-                    member.user.image ?? "/placeholder.svg?height=24&width=24",
-                  role: member.role,
-                })) ?? []),
-                {
-                  id: project.creator.id,
-                  name: project.creator.name ?? "",
-                  email: project.creator.email ?? "",
-                  avatar:
-                    project.creator.image ??
-                    "/placeholder.svg?height=24&width=24",
-                  role: ProjectRole.OWNER,
-                },
-              ]
-            : []
-        }
-        isCreator={project?.isCreator}
-        updateList={() => {
-          setListUpdated(true);
-        }}
-      />
-    </div>
+        <ProjectMembersModal
+          open={showMembers}
+          onOpenChange={setShowMembers}
+          projectId={params?.slug as string}
+          projectMembers={
+            project
+              ? [
+                  ...(project.members.map((member) => ({
+                    id: member.user.id,
+                    name: member.user.name ?? "",
+                    email: member.user.email ?? "",
+                    avatar:
+                      member.user.image ??
+                      "/placeholder.svg?height=24&width=24",
+                    role: member.role,
+                  })) ?? []),
+                  {
+                    id: project.creator.id,
+                    name: project.creator.name ?? "",
+                    email: project.creator.email ?? "",
+                    avatar:
+                      project.creator.image ??
+                      "/placeholder.svg?height=24&width=24",
+                    role: ProjectRole.OWNER,
+                  },
+                ]
+              : []
+          }
+          isCreator={project?.isCreator}
+          updateList={() => {
+            setListUpdated(true);
+          }}
+        />
+      </div>
+    </>
   );
 }

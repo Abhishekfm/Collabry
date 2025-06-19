@@ -215,7 +215,7 @@ export function TaskBoard({
                   {tasks[column.id].length}
                 </span>
               </div>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" disabled={true}>
                 <Plus className="h-4 w-4" />
               </Button>
             </div>

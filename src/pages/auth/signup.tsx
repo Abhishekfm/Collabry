@@ -30,6 +30,7 @@ import {
   FormControl,
   FormMessage,
 } from "~/components/ui/form"; // assuming you're using shadcn/ui
+import Head from "next/head";
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -74,106 +75,118 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 dark:bg-gray-950">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
-          <CardDescription>
-            Enter your information to create an account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="m@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {serverError && (
-                <p className="text-center text-sm text-red-500">
-                  {serverError}
-                </p>
-              )}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={signup.isPending}
+    <>
+      <Head>
+        <title>Sign Up | Collabry</title>
+        <meta
+          name="Sign Up"
+          content="Manage your tasks and team with Collabry."
+        />
+      </Head>
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 dark:bg-gray-950">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
+            <CardDescription>
+              Enter your information to create an account
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid gap-4"
               >
-                {signup.isPending ? "Signing up..." : "Sign Up"}
-              </Button>
-            </form>
-            <div className="grid gap-4">
-              <div className="relative mt-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="m@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {serverError && (
+                  <p className="text-center text-sm text-red-500">
+                    {serverError}
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={signup.isPending}
+                >
+                  {signup.isPending ? "Signing up..." : "Sign Up"}
+                </Button>
+              </form>
+              <div className="grid gap-4">
+                <div className="relative mt-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={async () => {
+                    await signIn("google", {
+                      callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL + "/dashboard",
+                    });
+                  }}
+                >
+                  <ChromeIcon className="mr-2 h-4 w-4" />
+                  Google
+                </Button>
+                <div className="mt-4 text-center text-sm">
+                  Already have an account?{" "}
+                  <Link href="/auth/signin" className="underline">
+                    Sign In
+                  </Link>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={async () => {
-                  await signIn("google", {
-                    callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL + "/dashboard",
-                  });
-                }}
-              >
-                <ChromeIcon className="mr-2 h-4 w-4" />
-                Google
-              </Button>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
-                <Link href="/auth/signin" className="underline">
-                  Sign In
-                </Link>
-              </div>
-            </div>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }

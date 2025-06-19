@@ -332,7 +332,7 @@ export default function ProfilePage() {
                         {task.description}
                       </p>
                       <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>Due: {task.dueDate.toLocaleDateString()}</span>
+                        {/* <span>Due: {task.dueDate.toLocaleDateString()}</span> */}
                         <Badge variant="outline">{task.status}</Badge>
                       </div>
                     </div>
