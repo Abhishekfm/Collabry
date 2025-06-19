@@ -342,7 +342,7 @@ export default function ProfilePage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="projects" className="space-y-6">
+          {/* <TabsContent value="projects" className="space-y-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {mockProjects.map((project) => (
                 <ProjectCard
@@ -360,7 +360,7 @@ export default function ProfilePage() {
                 <TaskCard key={task.id} task={task} />
               ))}
             </div>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </main>
     </div>

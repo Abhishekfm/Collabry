@@ -22,12 +22,16 @@ import { compare } from "bcrypt";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
+
+export type ProviderType = "credentials" | "google"; // Add more if needed
+
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: DefaultSession["user"] & {
       id: string;
       // ...other properties
       role: UserRole;
+      provider: ProviderType;
     };
   }
 
@@ -44,12 +48,15 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       // This runs at login
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        if (account?.provider) {
+          token.provider = account.provider;
+        }
       }
       return token;
     },
@@ -60,6 +67,7 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email!;
         session.user.name = token.name!;
         session.user.image = session.user.image!;
+        session.user.provider = token.provider as ProviderType;
       }
       return session;
     },

@@ -184,8 +184,18 @@ export const userRouter = createTRPCRouter({
         select: {
           id: true,
           password: true,
+          accounts: true,
         },
+
+        //include account provider
       });
+
+      if (!user?.password) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You cannot change the password",
+        });
+      }
 
       if (!user) {
         throw new TRPCError({
@@ -197,7 +207,7 @@ export const userRouter = createTRPCRouter({
       // Verify current password
       const isCurrentPasswordValid = await bcrypt.compare(
         currentPassword,
-        user.password,
+        user?.password,
       );
 
       if (!isCurrentPasswordValid) {

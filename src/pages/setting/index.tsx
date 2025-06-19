@@ -451,63 +451,30 @@ export default function ProfileSettingsPage() {
             </Card>
 
             {/* Security Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Security Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Alert>
-                  <AlertDescription>
-                    Leave password fields empty if you don&apos;t want to change
-                    your password.
-                  </AlertDescription>
-                </Alert>
+            {session?.user.provider === "credentials" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Security Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <Alert>
+                    <AlertDescription>
+                      Leave password fields empty if you don&apos;t want to
+                      change your password.
+                    </AlertDescription>
+                  </Alert>
 
-                <FormField
-                  control={form.control}
-                  name="currentPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Current Password</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter current password"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="newPassword"
+                    name="currentPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>New Password</FormLabel>
+                        <FormLabel>Current Password</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
-                              type={showNewPassword ? "text" : "password"}
-                              placeholder="Enter new password"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Enter current password"
                               {...field}
                             />
                             <Button
@@ -515,11 +482,9 @@ export default function ProfileSettingsPage() {
                               variant="ghost"
                               size="sm"
                               className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                              onClick={() =>
-                                setShowNewPassword(!showNewPassword)
-                              }
+                              onClick={() => setShowPassword(!showPassword)}
                             >
-                              {showNewPassword ? (
+                              {showPassword ? (
                                 <EyeOff className="h-4 w-4" />
                               ) : (
                                 <Eye className="h-4 w-4" />
@@ -532,27 +497,63 @@ export default function ProfileSettingsPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm New Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Confirm new password"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="newPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>New Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type={showNewPassword ? "text" : "password"}
+                                placeholder="Enter new password"
+                                {...field}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                onClick={() =>
+                                  setShowNewPassword(!showNewPassword)
+                                }
+                              >
+                                {showNewPassword ? (
+                                  <EyeOff className="h-4 w-4" />
+                                ) : (
+                                  <Eye className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
+                    <FormField
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm New Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="Confirm new password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {/* Actions */}
             <div className="flex justify-end">
               <Button

@@ -375,7 +375,7 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <div className="mb-4 flex gap-1">
-                  {[...Array(5)].map((_, i) => (
+                  {[...(Array(5).fill("s") as string[])].map((_, i) => (
                     <Star
                       key={i}
                       className="h-4 w-4 fill-current text-yellow-400"
