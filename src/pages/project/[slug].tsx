@@ -11,6 +11,7 @@ import { ProjectMembersModal } from "~/components/project-members-modal";
 import { Header } from "~/components/header";
 import Link from "next/link";
 import { api } from "~/utils/api";
+import { ProjectRole } from "@prisma/client";
 
 // Mock data
 const mockProject = {
@@ -155,15 +156,29 @@ export default function ProjectPage() {
         open={showMembers}
         onOpenChange={setShowMembers}
         projectId={params?.slug as string}
-        projectMembers={project?.members.map((member) => {
-          return {
-            id: member.user.id,
-            name: member.user.name ?? "",
-            email: member.user.email ?? "",
-            avatar: member.user.image ?? "/placeholder.svg?height=24&width=24",
-            role: member.role,
-          };
-        })}
+        projectMembers={
+          project
+            ? [
+                ...(project.members.map((member) => ({
+                  id: member.user.id,
+                  name: member.user.name ?? "",
+                  email: member.user.email ?? "",
+                  avatar:
+                    member.user.image ?? "/placeholder.svg?height=24&width=24",
+                  role: member.role,
+                })) ?? []),
+                {
+                  id: project.creator.id,
+                  name: project.creator.name ?? "",
+                  email: project.creator.email ?? "",
+                  avatar:
+                    project.creator.image ??
+                    "/placeholder.svg?height=24&width=24",
+                  role: ProjectRole.OWNER,
+                },
+              ]
+            : []
+        }
         isCreator={project?.isCreator}
         updateList={() => {
           setListUpdated(true);

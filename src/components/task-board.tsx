@@ -249,6 +249,7 @@ export function TaskBoard({
                             }`}
                           >
                             <TaskCard
+                              projectCreatorId={project.creatorId}
                               projectId={projectId}
                               projectMembers={project.members.map((member) => {
                                 return {

@@ -177,21 +177,28 @@ export const taskRouter = createTRPCRouter({
       const task = await ctx.db.task.findFirst({
         where: {
           id: input.id,
-          project: {
-            OR: [
-              {
-                members: {
-                  some: {
-                    userId: userId,
-                  },
-                },
+          OR: [
+            {
+              project: {
+                // OR: [
+                //   {
+                //     members: {
+                //       some: {
+                //         userId: userId,
+                //       },
+                //     },
+                //   },
+                // ],
+                creatorId: userId,
               },
-              { creatorId: userId },
-            ],
-          },
+            },
+            { assigneeId: userId },
+            { creatorId: userId },
+          ],
         },
         include: {
           project: true,
+          assignee: true,
         },
       });
 

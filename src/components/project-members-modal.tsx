@@ -32,6 +32,7 @@ import {
 } from "~/components/ui/form";
 import { api } from "~/utils/api";
 import toast from "react-hot-toast";
+import { ProjectRole } from "@prisma/client";
 
 const inviteSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -180,7 +181,7 @@ export function ProjectMembersModal({
                         <p className="font-medium text-gray-900">
                           {member.name}
                         </p>
-                        {member.role === "Creator" && (
+                        {member.role === ProjectRole.OWNER && (
                           <Badge
                             variant="secondary"
                             className="bg-yellow-100 text-yellow-800"

@@ -29,6 +29,7 @@ export interface TaskInfo {
 }
 
 interface TaskCardProps {
+  projectCreatorId: string;
   projectId: string;
   task: TaskInfo;
   projectMembers: Array<{
@@ -83,7 +84,12 @@ export function getTimeLeftString(deadline: Date): string {
   return parts.join(" ") + " left";
 }
 
-export function TaskCard({ task, projectId, projectMembers }: TaskCardProps) {
+export function TaskCard({
+  projectCreatorId,
+  task,
+  projectId,
+  projectMembers,
+}: TaskCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -141,6 +147,7 @@ export function TaskCard({ task, projectId, projectMembers }: TaskCardProps) {
             <h4 className="line-clamp-2 flex-1 pr-2 font-medium text-gray-900">
               {task.title}
             </h4>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -161,7 +168,8 @@ export function TaskCard({ task, projectId, projectMembers }: TaskCardProps) {
                   View Details
                 </DropdownMenuItem>
                 {(task.creator.id === session.data?.user.id ||
-                  task.assignee.id === session.data?.user.id) && (
+                  task.assignee.id === session.data?.user.id ||
+                  projectCreatorId === session.data?.user.id) && (
                   <>
                     <DropdownMenuItem
                       onClick={(e) => {
@@ -205,7 +213,7 @@ export function TaskCard({ task, projectId, projectMembers }: TaskCardProps) {
           )}
 
           {/* Priority */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-start gap-2">
             <Badge
               variant="secondary"
               className={priorityColors[task.priority]}
@@ -213,26 +221,36 @@ export function TaskCard({ task, projectId, projectMembers }: TaskCardProps) {
               <Flag className="mr-1 h-3 w-3" />
               {task.priority}
             </Badge>
+            {task.creator.id === session.data?.user.id && (
+              <Badge variant="outline" className="mb-3">
+                Owner
+              </Badge>
+            )}
           </div>
 
           {/* Footer */}
           <div className="flex items-center justify-between border-t border-gray-100 pt-2">
             <div className="flex items-center gap-2">
-              <Avatar className="h-6 w-6">
-                <AvatarImage
-                  src={task.assignee.avatar || "/placeholder.svg"}
-                  alt={task.assignee.name}
-                />
-                <AvatarFallback className="text-xs">
-                  {task.assignee.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-xs text-gray-500">
-                {task.assignee.name}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-[12px] text-slate-300">Assigned To:</span>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage
+                      src={task.assignee.avatar || "/placeholder.svg"}
+                      alt={task.assignee.name}
+                    />
+                    <AvatarFallback className="text-xs">
+                      {task.assignee.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs text-gray-500">
+                    {task.assignee.name}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center gap-1 text-xs text-gray-500">
