@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { TRPCError } from "@trpc/server";
 
 export const userRouter = createTRPCRouter({

@@ -7,6 +7,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
+import { env } from "~/env";
+
 
 import { api } from "~/utils/api"; // <-- your trpc/api hook
 import { Button } from "~/components/ui/button";
@@ -155,8 +157,9 @@ export default function SignUpPage() {
                 variant="outline"
                 className="w-full"
                 onClick={async () => {
+                  console.log
                   await signIn("google", {
-                    callbackUrl: "http://localhost:3000/dashboard",
+                    callbackUrl:  env.NEXT_PUBLIC_NEXTAUTH_URL+"/dashboard",
                   });
                 }}
               >

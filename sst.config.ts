@@ -20,7 +20,7 @@ export default $config({
     //     DATABASE_URL: process.env.DATABASE_URL || "",
     //     SUPABASE_URL: process.env.SUPABASE_URL || "",
     //     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-    //     NEXTAUTH_URL: process.env.NEXTAUTH_URL || "",
+    //     NEXT_PUBLIC_NEXTAUTH_URL: process.env.NEXT_PUBLIC_NEXTAUTH_URL || "",
     //     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "",
     //     // You can add other keys (e.g. OAuth client IDs) as needed
     //   },
@@ -32,7 +32,7 @@ export default $config({
       environment: {
         // Next.js environment vars (make sure to prefix with NEXT_PUBLIC_ for client-side)
         NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET!,
-        NEXTAUTH_URL: process.env.NEXTAUTH_URL!,
+        NEXT_PUBLIC_NEXTAUTH_URL: process.env.NEXT_PUBLIC_NEXTAUTH_URL!,
         DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID!,
         DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET!,
         SUPABASE_URL: process.env.SUPABASE_URL!,
@@ -44,16 +44,15 @@ export default $config({
       // buildCommand: "npm run build",
       dev: {
         command: "npm run dev",
-        url: "http://localhost:3000",
       },
     });
-
+ 
     // console.log("web", web);
 
     return {
       // Outputs (e.g. the HTTP API URL for tRPC)
       // ApiUrl: api.url,
-      link: web.getSSTLink(),
+      // link: web.getSSTLink(),
       webUrl: web.url,
     };
   },

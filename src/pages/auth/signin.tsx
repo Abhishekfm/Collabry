@@ -7,6 +7,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { env } from "~/env";
+
 import {
   Form,
   FormField,
@@ -44,6 +46,7 @@ export default function SignInPage() {
   const { data: session, status } = useSession();
   const [serverError, setServerError] = useState("");
   const [isPending, setIsPending] = useState(false);
+
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -198,9 +201,10 @@ export default function SignInPage() {
                 variant="outline"
                 className="w-full"
                 onClick={async () => {
-                  console.log("google login");
+                  console.log("google login",env.NEXT_PUBLIC_NEXTAUTH_URL);
                   await signIn("google", {
-                    callbackUrl: "http://localhost:3000/dashboard",
+                    
+                    callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL+"/dashboard",
                   });
                 }}
               >

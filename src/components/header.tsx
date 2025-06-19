@@ -13,6 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { env } from "~/env";
+
 
 export function Header() {
   const session = useSession();
@@ -82,7 +84,10 @@ export function Header() {
                   <span>Settings</span>
                 </DropdownMenuItem> */}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => void signOut()}>
+                <DropdownMenuItem onClick={async () => {
+          console.log("signout",window.location.origin, env.NEXT_PUBLIC_NEXTAUTH_URL)
+                  
+                  await signOut({callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL})}}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

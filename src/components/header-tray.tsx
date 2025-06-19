@@ -10,6 +10,8 @@ import { Bell, Settings, User, LogOut } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { env } from "~/env";
+
 
 export default function HeaderTray() {
   const session = useSession();
@@ -52,7 +54,9 @@ export default function HeaderTray() {
                   <span>Settings</span>
                 </DropdownMenuItem> */}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => void signOut()}>
+        <DropdownMenuItem onClick={async() => {
+          console.log("signout",window.location.origin, env.NEXT_PUBLIC_NEXTAUTH_URL)
+           await signOut({ callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL})}}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

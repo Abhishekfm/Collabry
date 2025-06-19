@@ -14,7 +14,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { type UserRole } from "@prisma/client";
-import { compare } from "bcrypt";
+import { compare } from "bcryptjs";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
