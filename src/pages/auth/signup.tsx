@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { env } from "~/env";
 
-
 import { api } from "~/utils/api"; // <-- your trpc/api hook
 import { Button } from "~/components/ui/button";
 import {
@@ -157,9 +156,8 @@ export default function SignUpPage() {
                 variant="outline"
                 className="w-full"
                 onClick={async () => {
-                  console.log
                   await signIn("google", {
-                    callbackUrl:  env.NEXT_PUBLIC_NEXTAUTH_URL+"/dashboard",
+                    callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL + "/dashboard",
                   });
                 }}
               >

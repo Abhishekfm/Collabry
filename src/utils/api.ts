@@ -19,8 +19,8 @@ const getBaseUrl = () => {
     return process.env.NEXT_PUBLIC_NEXTAUTH_URL;
   }
   if (process.env.VERCEL_URL) {
-    console.log("process.env.VERCEL_URL", process.env.VERCEL_URL)
-    return `https://${process.env.VERCEL_URL}`}; // SSR should use vercel url
+    return `https://${process.env.VERCEL_URL}`;
+  } // SSR should use vercel url
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 

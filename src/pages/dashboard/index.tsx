@@ -68,8 +68,6 @@ export default function Dashboard() {
     isLoading,
   } = api.project.getAll.useQuery();
 
-  console.log("getAllProjects", allProjects);
-
   useEffect(() => {
     if (projectUpdated) {
       void refetch();

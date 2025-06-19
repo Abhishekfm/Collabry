@@ -47,7 +47,6 @@ export default function SignInPage() {
   const [serverError, setServerError] = useState("");
   const [isPending, setIsPending] = useState(false);
 
-
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -201,10 +200,8 @@ export default function SignInPage() {
                 variant="outline"
                 className="w-full"
                 onClick={async () => {
-                  console.log("google login",env.NEXT_PUBLIC_NEXTAUTH_URL);
                   await signIn("google", {
-                    
-                    callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL+"/dashboard",
+                    callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL + "/dashboard",
                   });
                 }}
               >

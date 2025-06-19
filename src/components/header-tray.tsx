@@ -12,7 +12,6 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { env } from "~/env";
 
-
 export default function HeaderTray() {
   const session = useSession();
   return (
@@ -54,9 +53,11 @@ export default function HeaderTray() {
                   <span>Settings</span>
                 </DropdownMenuItem> */}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={async() => {
-          console.log("signout",window.location.origin, env.NEXT_PUBLIC_NEXTAUTH_URL)
-           await signOut({ callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL})}}>
+        <DropdownMenuItem
+          onClick={async () => {
+            await signOut({ callbackUrl: env.NEXT_PUBLIC_NEXTAUTH_URL });
+          }}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

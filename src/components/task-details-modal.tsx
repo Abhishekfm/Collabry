@@ -175,7 +175,6 @@ export function TaskDetailsModal({
     <Dialog
       open={isOpen}
       onOpenChange={() => {
-        console.log("closeee");
         onClose();
       }}
     >

@@ -47,8 +47,6 @@ export const projectRouter = createTRPCRouter({
           },
         });
 
-        console.log("user", users, members);
-
         // Step 3: Filter out creator from members (optional but usually useful)
         const membersToAdd = users.filter((user) => user.id !== creatorId);
 
@@ -125,8 +123,6 @@ export const projectRouter = createTRPCRouter({
             },
           });
 
-          console.log("users found for update:", users, members);
-
           // Filter out creator from members (optional but usually useful)
           const membersToAdd = users.filter(
             (user) => user.id !== ctx.session.user.id,
@@ -158,8 +154,6 @@ export const projectRouter = createTRPCRouter({
         where: { id: input.id },
         select: { creatorId: true },
       });
-
-      console.log("delete api called");
 
       if (!project || project.creatorId !== ctx.session.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Not allowed." });

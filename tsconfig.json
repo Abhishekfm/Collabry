@@ -36,7 +36,11 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "jest.config.mjs",
+    "jest.config.mjs",
+    "jest.setupjts",
+    "**/*.test.ts"
   ],
   "exclude": ["node_modules", "sst.config.ts"]
 }
