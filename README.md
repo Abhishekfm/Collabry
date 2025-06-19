@@ -4,6 +4,7 @@ Collabry is a full-stack, serverless task management and collaboration app built
 
 ---
 
+[Live Link](https://d35qu8q6pavbde.cloudfront.net/)
 ## 📐 Tech Stack
 
 | Layer            | Technology                      |
