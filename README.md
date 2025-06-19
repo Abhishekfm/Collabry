@@ -171,18 +171,6 @@ https://your-cloudfront-url.com/api/auth/callback/google
 
 ```
 
-🌐 Custom Domain (Optional)
-You can configure a custom domain in SST using Route53:
-
-```ts
-cdk: {
-  domain: {
-    domainName: "yourdomain.com",
-    hostedZone: "yourdomain.com",
-  },
-}
-```
-
 🧩 Known Issues
 If redirect after sign-in/sign-out goes to localhost in prod, verify NEXT_PUBLIC_NEXTAUTH_URL is set correctly
 
